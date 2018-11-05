@@ -1,0 +1,271 @@
+air conditioner
+air fryer
+air ioniser
+aroma lamp
+attic fan
+bachelor griller
+back boiler
+barbecue
+beehive oven
+beverage opener
+boiler
+bread machine
+butane torch
+can opener
+ceiling fan
+central vacuum cleaner
+clothes dryer
+clothes iron
+coffee percolator
+coffeemaker
+combo washer dryer
+compactor
+convection heater
+convection microwave
+convection oven
+corn roaster
+crepe maker
+deep fryer
+dehumidifier
+dishwasher
+earth oven
+electric cooker
+electric water boiler
+embroidery machine
+energy regulator
+espresso machine
+fan heater
+field kitchen
+fire pot
+fireplace toaster
+flame supervision device
+flattop grill
+food steamer
+garbage disposal unit
+hair dryer
+hair iron
+halogen oven
+home server
+hot plate
+humidifier
+HVAC
+icebox
+instant hot water dispenser
+internet refrigerator
+kettle
+kimchi refrigerator
+kitchener range
+micathermic heater
+microwave oven
+mousetrap
+oil heater
+oven
+panini sandwich grill
+patio heater
+pneumatic vacuum
+popcorn maker
+pressure cooker
+pressure fryer
+radiator
+reflector oven
+refrigerator
+rice cooker
+rice polisher
+robotic vacuum cleaner
+rotisserie
+sandwich toaster
+self-cleaning oven
+set-n-forget cooker
+sewing machine
+slow cooker
+solar cooker
+sous-vide cooker
+soy milk maker
+stove
+sump pump
+susceptor
+swamp cooler
+tandoor
+thermal immersion circulator
+thermal mass refrigerator
+tie press
+toaster
+toaster oven
+trivet
+trouser press
+turkey fryer
+vacuum cleaner
+vacuum fryer
+vaporizer
+waffle iron
+washing machine
+water cooker
+water cooler
+water heater
+wet grinder
+window fan
+wood-fired oven
+Airship
+Autogyro
+Balloon
+Blimp
+Fixed-wing aircraft
+Airplane
+Glider aircraft
+Hang glider
+Helicopter
+Jet aircraft
+Jet pack
+Wingpack
+Unmanned aerial vehicle
+Automobile
+Bicycle
+Bus
+Motorcycle
+Scooter
+Segway Personal Transporter
+Single-track vehicle
+Skateboard
+Skis
+Sled
+Snowboard
+Snowmobile
+Space Hopper
+Sports car
+Steam car
+Suv
+Tank
+Tractor
+Traction engine
+Train
+Tram
+Tricycle
+Trolleybus
+Truck
+Unicycle
+Van
+Velocipede
+Velomobile
+Wagon
+Wheelbarrow
+Boat
+Canoe
+Hydrofoil
+Kayak
+Sailboat
+Ship
+Submarine
+Submersible
+Surfboard
+Yacht
+Desktop PC
+Workstation
+Flat Screen Monitor
+CRT Monitor
+Computer Mouse
+Cable
+Laptop
+Hard Drive
+Power Supply
+Gaming Device
+Keyboard
+Network Device
+Circuit Board
+Copier
+Fax Machine
+PBX System
+Projector
+Laser Printer
+Label Printer
+3D Printer
+Plotter
+Cell Phone
+Smartphone
+Tablet
+Personal Digital Assistant
+Gaming Device
+MP3 Player
+Camera
+Server
+Storage Array
+Power Distribution Unit
+Router
+Mainframe Computer Equipment
+Motor Generator Set
+Server Rack
+Cable Box
+Internet of Things
+Sensor
+Personal Wearable
+GPS Device
+Tracker
+Smart Home Device
+Monitoring Camera
+Smart Thermostat
+Security System
+Prototype
+Point of Sale (POS) System
+Scanner
+Credit card terminal
+Circuit Board
+Copper Scrap
+Recalled product
+Power supply unit
+Computer memory
+Test Equipment
+Meter
+Scope
+Anesthesia Unit
+Defibrillator
+IV Pump
+Spectrometer
+Ultrasound Equipment
+astronaut
+booster
+capsule
+communications satellite
+cosmonaut
+craft
+dock
+flying saucer
+gantry
+launch
+launch pad
+lunar module
+mission
+module
+moonwalk
+orbiter
+pad
+payload
+pod
+probe
+rocket
+rover
+satellite
+ship
+shuttle
+space capsule
+spacecraft
+spaceman
+space probe
+spaceship
+space shuttle
+space station
+spacesuit
+spacewoman
+starship
+test flight
+thruster
+tracking station
+website
+app
+application
+site
+robot
+aquarium
+fishtank
+doorbell
+solar panel
+battery
+power bank
