@@ -8,7 +8,12 @@ use File::Temp;
 use PDF::API2;
 
 # CONFIG
-use constant POVRAY => '/usr/local/bin/povray37';
+use constant {
+  POVRAY => '/usr/local/bin/povray37',
+  DPI => 72,
+  QUALITY => 4,
+  ANTIALIAS => 0,
+};
 
 ##############################################################################
 # HELPER FUNCTIONS
@@ -115,6 +120,48 @@ light_source { <2, 4, -3> color White}
 EOF
 }
 
+##############################################################################
+# RENDER FUNCTION
+#  Usage: render(script, pdf, page, x, y, w, h)
+#
+# Given the POV-Ray script in $script,
+#  call POV-Ray and render a .png image.
+# Then, import it to the pdf document,
+#  create an area on page at x,y with w,h size,
+#  and draw it on the PDF.
+sub render
+{
+  my ($script, $pdf, $page, $x, $y, $w, $h) = @_;
+
+  # Create a POV-Ray script
+  #  POV-Ray will not read from stdin (despite what the manual says)
+  #  so use a temp file instead.
+  my $tmp = File::Temp->new( SUFFIX => '.pov' );
+  # Write the supplied script to the file.
+  print $tmp $script;
+  # Close file, no more writing
+  close $tmp;
+
+  # RENDER COMMAND
+  #  Adjust quality settings here (antialiasing, etc)
+  my $cmd = POVRAY . ' +I' . $tmp->filename . ' +O- -GD -GR -GS -RVP +W' . int($w*DPI/72) . ' +H' . int($h*DPI/72) . ' +Q' . QUALITY;
+  if (ANTIALIAS) {
+    $cmd .= ' +A';
+  }
+  # Call POV-Ray to render it, result goes to stdout which we capture
+  my $png = `$cmd`;
+  # hook filehandle to scalar and import to PDF
+  open (my $sh, '<', \$png) or die "Could not open scalar as filehandle: $!";
+  my $image = $pdf->image_png($sh);
+  close ($sh);
+
+  # Create a gfx object on the page
+  my $gfx = $page->gfx();
+  # Place it at the specified coords
+  $gfx->image($image, $x, $y, $w, $h);
+  # All done.
+  $pdf->finishobjects($gfx);
+}
 
 ##############################################################################
 # Load data files
@@ -125,23 +172,45 @@ $data{technologies} = load('data/technologies.txt');
 
 # Create a blank PDF file
 my $pdf = PDF::API2->new( -file => 'out.pdf' );
- 
+
 # Add a built-in font to the PDF
 my $font = $pdf->corefont('Helvetica-Bold');
- 
-# Add a blank page
-my $page = $pdf->page();
-# Set the page size
-#  US Letter at 72dpi is 612x792 pt
-$page->mediabox('Letter');
- 
-# Add some text to the page
-my $text = $page->text();
-$text->font($font, 20);
-$text->translate(150, 700);
-$text->text('CATALOG NANOGENMO');
-$pdf->finishobjects($text, $page);
 
+# FRONT COVER
+{
+  # Add a blank page
+  my $page = $pdf->page();
+  # Set the page size
+  $page->mediabox('Letter');
+
+  # Make a big fancy image for the background.
+  render(generate_example(), $pdf, $page, 0, 0, 612, 792);
+
+  # Add some text overlay on the page.
+  my $text = $page->text();
+  $text->font($font, 20);
+  $text->translate(150, 700);
+  $text->text('CATALOG NANOGENMO');
+  $pdf->finishobjects($text, $page);
+}
+
+# TITLE PAGE
+{
+  # Add a blank page
+  my $page = $pdf->page();
+  # Set the page size
+  #  US Letter at 72dpi is 612x792 pt
+  $page->mediabox('Letter');
+
+  # Add some text to the page
+  my $text = $page->text();
+  $text->font($font, 20);
+  $text->translate(150, 700);
+  $text->text('TITLE PAGE');
+  $pdf->finishobjects($text, $page);
+}
+
+# CONTENT PAGES
 # Loop 5 pages
 for (my $i = 0; $i < 5; $i ++)
 {
@@ -161,51 +230,60 @@ for (my $i = 0; $i < 5; $i ++)
     pick(@{$data{adjectives}}),
     pick(@{$data{nouns}})
   );
-  
+
   # Create some ad copy
   my $description = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
-  
+
   # Create an ID number
   my $id = join('', map { substr($_, 0, 1) } split(/ /, $title)) . int(rand(99999));
-  
+
   # Create a price
   my $price = int(rand(150) + 2)  - 0.05;
- 
-  # Place text on page. 
+
+  # Place text on page.
   $text->text("$title\n$description\n$title ($id) \$$price");
 
   # Done with text.
   $pdf->finishobjects($text);
 
-  # Create a POV-Ray script
-  #  POV-Ray will not read from stdin (despite what the manual says)
-  #  so use a temp file instead.
-  my $tmp = File::Temp->new( SUFFIX => '.pov' );
-
-  # Create the script and print it into the file.
-  my $script = generate_example();
-  print $tmp $script;
-
-  # Close file, no more writing
-  close $tmp;
-
-  # RENDER COMMAND
-  my $cmd = POVRAY . ' +I' . $tmp->filename . ' +O- -GD -GR -GS';
-  # Call POV-Ray to render it, result goes to stdout which we capture
-  my $png = `$cmd`;
-  # hook filehandle to scalar and import to PDF
-  open (my $sh, '<', \$png) or die "Could not open scalar as filehandle: $!";
-  my $image = $pdf->image_png($sh);
-  close ($sh);
-
-  # position on page
-  my $gfx = $page->gfx();
-  $gfx->image($image, 50, 100, 512, 400);
-  $pdf->finishobjects($gfx);
+  # Render a picture of the object.
+  render(generate_example(), $pdf, $page, 50, 100, 512, 400);
 
   # done with page!
   $pdf->finishobjects($page);
 }
- 
+
+# ORDER FORM
+{
+  # Add a blank page
+  my $page = $pdf->page();
+  # Set the page size
+  #  US Letter at 72dpi is 612x792 pt
+  $page->mediabox('Letter');
+
+  # Add some text to the page
+  my $text = $page->text();
+  $text->font($font, 20);
+  $text->translate(150, 700);
+  $text->text('ORDER FORM');
+  $pdf->finishobjects($text, $page);
+}
+
+# BACK COVER
+{
+  # Add a blank page
+  my $page = $pdf->page();
+  # Set the page size
+  #  US Letter at 72dpi is 612x792 pt
+  $page->mediabox('Letter');
+
+  # Add some text to the page
+  my $text = $page->text();
+  $text->font($font, 20);
+  $text->translate(150, 700);
+  $text->text('BACK COVER');
+  $pdf->finishobjects($text, $page);
+}
+
 # Save the PDF
 $pdf->save();
