@@ -368,6 +368,180 @@ sub text
 # LAYOUT
 #  The functions here do layout of a block on the page
 
+# Global definition of all available layouts (const)
+use constant LAYOUTS => (
+  [
+    # full page bleed
+    ['2x3'],
+  ], [
+    # 2x2 square, fill rest with 2x1 or a pair of 1x1
+    ['2x2', 0],
+    ['2x1', 2],
+  ], [
+    ['2x2', 0],
+    ['1x1', 2, 0],
+    ['1x1', 2, 1],
+  ], [
+    ['2x1', 0],
+    ['2x2', 1],
+  ], [
+    ['1x1', 0, 0],
+    ['1x1', 0, 1],
+    ['2x2', 1],
+  ], [
+    # Full-height columnar layouts
+    ['1x3', 0],
+    ['1x3', 1],
+  ], [
+    ['1x3', 0],
+    ['1x2', 0, 1],
+    ['1x1', 2, 1],
+  ], [
+    ['1x3', 0],
+    ['1x1', 0, 1],
+    ['1x2', 1, 1],
+  ], [
+    ['1x3', 0],
+    ['1x1', 0, 1],
+    ['1x1', 1, 1],
+    ['1x1', 2, 1],
+  ], [
+    ['1x2', 0, 0],
+    ['1x1', 2, 0],
+    ['1x3', 1],
+  ], [
+    ['1x1', 0, 0],
+    ['1x2', 1, 0],
+    ['1x3', 1],
+  ], [
+    ['1x1', 0, 0],
+    ['1x1', 1, 0],
+    ['1x1', 2, 0],
+    ['1x3', 1],
+  ], [
+    # 1x2 blocks with 1x1 filler
+    ['1x2', 0, 0],
+    ['1x1', 2, 0],
+    ['1x2', 0, 1],
+    ['1x1', 2, 1],
+  ], [
+    ['1x2', 0, 0],
+    ['1x1', 2, 0],
+    ['1x1', 0, 1],
+    ['1x2', 1, 1],
+  ], [
+    ['1x1', 0, 0],
+    ['1x2', 1, 0],
+    ['1x2', 0, 1],
+    ['1x1', 2, 1],
+  ], [
+    ['1x1', 0, 0],
+    ['1x2', 1, 0],
+    ['1x1', 0, 1],
+    ['1x2', 1, 1],
+  ], [
+    # Single 1x2
+    ['1x2', 0, 0],
+    ['1x1', 2, 0],
+    ['1x1', 0, 1],
+    ['1x1', 1, 1],
+    ['1x1', 2, 1],
+  ], [
+    ['1x1', 0, 0],
+    ['1x2', 1, 0],
+    ['1x1', 0, 1],
+    ['1x1', 1, 1],
+    ['1x1', 2, 1],
+  ], [
+    ['1x1', 0, 0],
+    ['1x1', 1, 0],
+    ['1x1', 2, 0],
+    ['1x2', 0, 1],
+    ['1x1', 2, 1],
+  ], [
+    ['1x1', 0, 0],
+    ['1x1', 1, 0],
+    ['1x1', 2, 0],
+    ['1x1', 0, 1],
+    ['1x2', 1, 1],
+  ], [
+    # Mixed wide and tall rectangles
+    ['1x2', 0, 0],
+    ['1x2', 0, 1],
+    ['2x1', 2],
+  ], [
+    ['2x1', 0],
+    ['1x2', 1, 0],
+    ['1x2', 1, 1],
+  ], [
+    # Very broken layouts
+    ['1x2', 0, 0],
+    ['1x1', 0, 1],
+    ['1x1', 1, 1],
+    ['2x1', 2],
+  ], [
+    ['1x1', 0, 0],
+    ['1x1', 1, 0],
+    ['1x2', 0, 1],
+    ['2x1', 2],
+  ], [
+    ['2x1', 0],
+    ['1x2', 1, 0],
+    ['1x1', 1, 1],
+    ['1x1', 2, 1],
+  ], [
+    ['2x1', 0],
+    ['1x1', 1, 0],
+    ['1x1', 2, 0],
+    ['1x2', 1, 1],
+  ], [
+    # Various combinations of 2x1 blocks
+    ['2x1', 0],
+    ['2x1', 1],
+    ['2x1', 2],
+  ], [
+    ['2x1', 0],
+    ['2x1', 1],
+    ['1x1', 2, 0],
+    ['1x1', 2, 1],
+  ], [
+    ['2x1', 0],
+    ['1x1', 1, 0],
+    ['1x1', 1, 1],
+    ['2x1', 2],
+  ], [
+    ['2x1', 0],
+    ['1x1', 1, 0],
+    ['1x1', 1, 1],
+    ['1x1', 2, 0],
+    ['1x1', 2, 1],
+  ], [
+    ['1x1', 0, 0],
+    ['1x1', 0, 1],
+    ['2x1', 1],
+    ['2x1', 2],
+  ], [
+    ['1x1', 0, 0],
+    ['1x1', 0, 1],
+    ['2x1', 1],
+    ['1x1', 2, 0],
+    ['1x1', 2, 1],
+  ], [
+    ['1x1', 0, 0],
+    ['1x1', 0, 1],
+    ['1x1', 1, 0],
+    ['1x1', 1, 1],
+    ['2x1', 2],
+  ], [
+    ['1x1', 0, 0],
+    ['1x1', 0, 1],
+    ['1x1', 1, 0],
+    ['1x1', 1, 1],
+    ['1x1', 2, 0],
+    ['1x1', 2, 1],
+  ]
+);
+
 # Full page spread (2x3)
 sub layout_2x3
 {
@@ -420,7 +594,6 @@ sub layout_2x2
     $y = 504;
   }
 
-  #say "Placing a 2x2 block at $y (height: $h)";
   ###
   # Render a picture of the object.
   my $scene = generate_header() . generate_object() . generate_scene_lightbox();
@@ -463,7 +636,6 @@ sub layout_2x1
     $y = 252;
   }
 
-  #say "Placing a 2x1 block at $y (height: $h)";
   ###
   # Render a picture of the object.
   my $scene = generate_header() . generate_object() . generate_scene_lightbox();
@@ -504,7 +676,6 @@ sub layout_1x3
     $x = 324;
   }
 
-  #say "Placing a 1x3 block at $x (width: $w)";
   ###
   # Render a picture of the object.
   my $scene = generate_header() . generate_object() . generate_scene_lightbox();
@@ -552,7 +723,6 @@ sub layout_1x2
     $y = 504;
   }
 
-  #say "Placing a 2x2 block at $y (height: $h)";
   ###
   # Render a picture of the object.
   my $scene = generate_header() . generate_object() . generate_scene_lightbox();
@@ -601,7 +771,6 @@ sub layout_1x1
     $x = 324;
   }
 
-  #say "Placing a 1x1 block at $x,$y (w/h: $w,$h)";
   ###
   # Render a picture of the object.
   my $scene = generate_header() . generate_object() . generate_scene_lightbox();
@@ -687,8 +856,8 @@ $font{helvetica_bold} = $pdf->corefont('Helvetica-Bold');
 }
 
 # CONTENT PAGES
-# Loop 5 pages
-for (my $i = 0; $i < 34; $i ++)
+# Loop N pages
+for (my $i = 0; $i < 5; $i ++)
 {
   say "page $i...";
 
@@ -698,178 +867,26 @@ for (my $i = 0; $i < 34; $i ++)
   $page->mediabox('Letter');
 
   # Big switch block to fill each layout
-  #my $layout = int(rand(6000));
-  my $layout = $i;
+  my $pattern = (LAYOUTS)[int(rand(scalar(LAYOUTS)))];
 
-  if ($layout == 0) {
-    # full page bleed
-    layout_2x3($page);
-  } elsif ($layout == 1) {
-    # 2x2 square, fill rest with 2x1 or a pair of 1x1
-    layout_2x2($page, 0);
-    layout_2x1($page, 2);
-  } elsif ($layout == 2) {
-    layout_2x2($page, 0);
-    layout_1x1($page, 2, 0);
-    layout_1x1($page, 2, 1);
-  } elsif ($layout == 3) {
-    layout_2x1($page, 0);
-    layout_2x2($page, 1);
-  } elsif ($layout == 4) {
-    layout_1x1($page, 0, 0);
-    layout_1x1($page, 0, 1);
-    layout_2x2($page, 1);
-  } elsif ($layout == 5) {
-    # Full-height columnar layouts
-    layout_1x3($page, 0);
-    layout_1x3($page, 1);
-  } elsif ($layout == 6) {
-    layout_1x3($page, 0);
-    layout_1x2($page, 0, 1);
-    layout_1x1($page, 2, 1);
-  } elsif ($layout == 7) {
-    layout_1x3($page, 0);
-    layout_1x1($page, 0, 1);
-    layout_1x2($page, 1, 1);
-  } elsif ($layout == 8) {
-    layout_1x3($page, 0);
-    layout_1x1($page, 0, 1);
-    layout_1x1($page, 1, 1);
-    layout_1x1($page, 2, 1);
-  } elsif ($layout == 9) {
-    layout_1x2($page, 0, 0);
-    layout_1x1($page, 2, 0);
-    layout_1x3($page, 1);
-  } elsif ($layout == 10) {
-    layout_1x1($page, 0, 0);
-    layout_1x2($page, 1, 0);
-    layout_1x3($page, 1);
-  } elsif ($layout == 11) {
-    layout_1x1($page, 0, 0);
-    layout_1x1($page, 1, 0);
-    layout_1x1($page, 2, 0);
-    layout_1x3($page, 1);
-  } elsif ($layout == 12) {
-    # 1x2 blocks with 1x1 filler
-    layout_1x2($page, 0, 0);
-    layout_1x1($page, 2, 0);
-    layout_1x2($page, 0, 1);
-    layout_1x1($page, 2, 1);
-  } elsif ($layout == 13) {
-    layout_1x2($page, 0, 0);
-    layout_1x1($page, 2, 0);
-    layout_1x1($page, 0, 1);
-    layout_1x2($page, 1, 1);
-  } elsif ($layout == 14) {
-    layout_1x1($page, 0, 0);
-    layout_1x2($page, 1, 0);
-    layout_1x2($page, 0, 1);
-    layout_1x1($page, 2, 1);
-  } elsif ($layout == 15) {
-    layout_1x1($page, 0, 0);
-    layout_1x2($page, 1, 0);
-    layout_1x1($page, 0, 1);
-    layout_1x2($page, 1, 1);
-  } elsif ($layout == 16) {
-    # Single 1x2
-    layout_1x2($page, 0, 0);
-    layout_1x1($page, 2, 0);
-    layout_1x1($page, 0, 1);
-    layout_1x1($page, 1, 1);
-    layout_1x1($page, 2, 1);
-  } elsif ($layout == 17) {
-    layout_1x1($page, 0, 0);
-    layout_1x2($page, 1, 0);
-    layout_1x1($page, 0, 1);
-    layout_1x1($page, 1, 1);
-    layout_1x1($page, 2, 1);
-  } elsif ($layout == 18) {
-    layout_1x1($page, 0, 0);
-    layout_1x1($page, 1, 0);
-    layout_1x1($page, 2, 0);
-    layout_1x2($page, 0, 1);
-    layout_1x1($page, 2, 1);
-  } elsif ($layout == 19) {
-    layout_1x1($page, 0, 0);
-    layout_1x1($page, 1, 0);
-    layout_1x1($page, 2, 0);
-    layout_1x1($page, 0, 1);
-    layout_1x2($page, 1, 1);
-  } elsif ($layout == 20) {
-    # Mixed wide and tall rectangles
-    layout_1x2($page, 0, 0);
-    layout_1x2($page, 0, 1);
-    layout_2x1($page, 2);
-  } elsif ($layout == 21) {
-    layout_2x1($page, 0);
-    layout_1x2($page, 1, 0);
-    layout_1x2($page, 1, 1);
-  } elsif ($layout == 22) {
-    # Very broken layouts
-    layout_1x2($page, 0, 0);
-    layout_1x1($page, 0, 1);
-    layout_1x1($page, 1, 1);
-    layout_2x1($page, 2);
-  } elsif ($layout == 23) {
-    layout_1x1($page, 0, 0);
-    layout_1x1($page, 1, 0);
-    layout_1x2($page, 0, 1);
-    layout_2x1($page, 2);
-  } elsif ($layout == 24) {
-    layout_2x1($page, 0);
-    layout_1x2($page, 1, 0);
-    layout_1x1($page, 1, 1);
-    layout_1x1($page, 2, 1);
-  } elsif ($layout == 25) {
-    layout_2x1($page, 0);
-    layout_1x1($page, 1, 0);
-    layout_1x1($page, 2, 0);
-    layout_1x2($page, 1, 1);
-  } elsif ($layout == 26) {
-    # Various combinations of 2x1 blocks
-    layout_2x1($page, 0);
-    layout_2x1($page, 1);
-    layout_2x1($page, 2);
-  } elsif ($layout == 27) {
-    layout_2x1($page, 0);
-    layout_2x1($page, 1);
-    layout_1x1($page, 2, 0);
-    layout_1x1($page, 2, 1);
-  } elsif ($layout == 28) {
-    layout_2x1($page, 0);
-    layout_1x1($page, 1, 0);
-    layout_1x1($page, 1, 1);
-    layout_2x1($page, 2);
-  } elsif ($layout == 29) {
-    layout_2x1($page, 0);
-    layout_1x1($page, 1, 0);
-    layout_1x1($page, 1, 1);
-    layout_1x1($page, 2, 0);
-    layout_1x1($page, 2, 1);
-  } elsif ($layout == 30) {
-    layout_1x1($page, 0, 0);
-    layout_1x1($page, 0, 1);
-    layout_2x1($page, 1);
-    layout_2x1($page, 2);
-  } elsif ($layout == 31) {
-    layout_1x1($page, 0, 0);
-    layout_1x1($page, 0, 1);
-    layout_2x1($page, 1);
-    layout_1x1($page, 2, 0);
-    layout_1x1($page, 2, 1);
-  } elsif ($layout == 32) {
-    layout_1x1($page, 0, 0);
-    layout_1x1($page, 0, 1);
-    layout_1x1($page, 1, 0);
-    layout_1x1($page, 1, 1);
-    layout_2x1($page, 2);
-  } else {
-    layout_1x1($page, 0, 0);
-    layout_1x1($page, 0, 1);
-    layout_1x1($page, 1, 0);
-    layout_1x1($page, 1, 1);
-    layout_1x1($page, 2, 0);
-    layout_1x1($page, 2, 1);
+  for (my $j = 0; $j < scalar @$pattern; $j ++) {
+    my $block = $pattern->[$j];
+
+    say " . block $j of " . scalar(@$pattern) . " (type " . $block->[0] . ")";
+
+    if ($block->[0] eq '2x3') {
+      layout_2x3($page);
+    } elsif ($block->[0] eq '2x2') {
+      layout_2x2($page, $block->[1]);
+    } elsif ($block->[0] eq '2x1') {
+      layout_2x1($page, $block->[1]);
+    } elsif ($block->[0] eq '1x3') {
+      layout_1x3($page, $block->[1]);
+    } elsif ($block->[0] eq '1x2') {
+      layout_1x2($page, $block->[1], $block->[2]);
+    } else {
+      layout_1x1($page, $block->[1], $block->[2]);
+    }
   }
 
   # done with page!
