@@ -13,7 +13,9 @@ use constant {
   POVRAY => '/usr/local/bin/povray37',
   DPI => 72,
   QUALITY => 9,
-  ANTIALIAS => 0,
+  ANTIALIAS => 1,
+
+  PAGES => 20,
 };
 
 # layout dimensions etc
@@ -57,6 +59,29 @@ sub load
 ######################################
 # Texture / Surface Generators
 
+# helper: pass a 3-component array and get back a bracketed print representation
+sub vect
+{
+  return ' <' . join(',', @_) . '> ';
+}
+
+# helper: given a point and a radius, choose a new random point on the sphere surface
+sub point_on_sphere
+{
+  my ($x, $y, $z, $r) = @_;
+
+  my ($new_x, $new_y, $new_z) = (0, 0, 0);
+  for (my $q = 0; $q < 15; $q ++) {
+    $new_x += rand($r) - ($r / 2);
+    $new_y += rand($r) - ($r / 2);
+    $new_z += rand($r) - ($r / 2);
+  }
+
+  my $dist = sqrt($new_x * $new_x + $new_y * $new_y + $new_z * $new_z);
+
+  return ($x + $new_x / $dist, $y + $new_y / $dist, $z + $new_z / $dist);
+}
+
 # Generate random color
 sub generate_color
 {
@@ -81,21 +106,56 @@ EOF
 ######################################
 # Object Generators
 
-# generator: make a dummy wearing clothes
-sub generate_clothes
-{
-}
-
 # generator: make a recursive "thing"
 sub generate_object
 {
-  return <<'EOF';
-torus {
-  0.5, 0.25         // major and minor radius
-  rotate -45*x      // so we can see it from the top
-  pigment { Green }
-}
-EOF
+  # get x/y coords of object "base"
+  my $x = shift || 0;
+  my $y = shift || 0;
+  my $z = shift || 0;
+
+  # avoid deep recursion
+  my $depth = shift || 0;
+  if ($depth > 5) { return "" }
+
+  # all 3.7.0 objects
+  my $object = pick( 'blob' ); #, 'box', 'cone', 'cylinder', 'height_field', 'isosurface', 'julia_fractal', 'lathe', 'ovus', 'parametric', 'prism', 'sphere', 'sphere_sweep', 'superellipsoid', 'sor', 'text', 'torus' );
+
+  # script fragment we will return at the end
+  #  and array of subobjects connected here
+  my @subobjects;
+  my $script = $object . " {\n";
+
+  # BLOB type: made of smaller objects
+  if ($object eq 'blob') {
+    # at least first should hit the xyz point
+    $script .= "threshold " . rand() . "\n";
+    my $radius = rand(2);
+    $script .= "  sphere { " . vect($x,$y,$z) . ", " . $radius . " 1 " . generate_texture() . " }\n";
+
+    # the rest can scatter all over, each may be a connection point to something else
+    for (my $i = 0; $i < int(rand(5)); $i ++)
+    {
+      my ($new_x, $new_y, $new_z) = point_on_sphere($x, $y, $z, $radius + rand(2));
+      my $r2 = rand(1);
+      $script .= "  sphere { " . vect($new_x,$new_y,$new_z) . ", " . $r2 . " 1 " . generate_texture() . " }\n";
+    }
+  } elsif ($object eq 'torus') {
+    $script .= "  0.5, 0.25\n  rotate -45*x\n  pigment { Green }\n";
+  }
+
+  # subobjects happen here
+  #for (my $i = 0; $i < int(rand(5)); $i ++)
+  #{
+  #  my $subobj = generate_object($x, $y, $z, $depth + 1);
+  #  if ($subobj) { $script .= ("  " x $depth) . $subobj . "\n" }
+    #$script .= "  sphere { <$x,$y,$z>, " . rand() . " 1 " . generate_texture() . " }\n";
+  #}
+
+  # terminate object
+  $script .= "}";
+
+  return $script;
 }
 
 ######################################
@@ -107,6 +167,8 @@ sub generate_scene_lightbox
 {
   return <<'EOF';
 camera {
+  up y * image_height
+  right x * image_width
   location <0, 2, -2>
   look_at <0, 0, 0>
   angle 45
@@ -234,21 +296,64 @@ global_settings { assumed_gamma 1.0 }
 EOF
 }
 
+# complete scene
+sub generate_scene {
+  # default header
+  my $final_scene = generate_header();
+
+  # background items
+  my $location = pick('yard', 'lightbox');
+  if ($location eq 'yard') {
+    $final_scene .= generate_scene_yard();
+  } else {
+    $final_scene .= generate_scene_lightbox();
+  }
+
+  # the object
+  $final_scene .= generate_object();
+
+  return $final_scene;
+}
+
 ######################################
 # TEXT GENERATORS
 
 # Item title / name
 sub generate_name {
-  return join(' ',
-    pick("", pick(@{$data{adjectives}})),
-    pick(@{$data{adjectives}}),
-    pick(@{$data{nouns}})
-  );
+  return
+    pick("", pick(@{$data{adjectives}}) . ' ') .
+    pick(@{$data{adjectives}}) . ' ' .
+    pick(@{$data{nouns}});
 }
 
-# Item description
+# Grammar bits, which can be strung together to make larger phrases
+#  Create some "action" you can perform with the object
+sub generate_action {
+  return pick(@{$data{verbs}}) . ' ' . pick('a','the','your','any') . ' ' . pick(@{$data{nouns}});
+}
+
+# Item description: one paragraph
 sub generate_description {
-  return 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
+  my $intro = pick('At last', "It's back", 'The latest in ' . pick(@{$data{technologies}}), 'Behold', 'Check this out') . pick('!',':',' -');
+
+  # some features
+  my $features = '';
+  for (my $i = 0; $i < 3; $i ++)
+  {
+    my $action = pick('Now you can ', 'Allows you to ', 'Designed to ', 'Made to ', 'Enables you to ', "It's a snap to ") . generate_action() . pick('.','!');
+    my $feature = pick('Features','Featuring a','Sports a','Includes a','Boasting a') . ' ' . pick(@{$data{adjectives}}) . ' ' . pick(@{$data{nouns}}) . '.';
+
+    $features = $features . pick($action, $feature) . ' ';
+  }
+
+
+  my $requires = 'Requires ' . pick(int(rand(10)) . ' ' . pick('AA','AAA','D') . ' batteries', pick('a', 'one', pick(@{$data{adjectives}}) . ' ' . pick(@{$data{nouns}}))) . ' (not included)';
+  my $weight = 'Weight: ' . int(rand(30)) . ' pounds.';
+  my $size = 'Size: ' . int(rand(30)) . 'x' . int(rand(30)) . 'x' . int(rand(30));
+  my $age = 'Ages ' . int(rand(18)) . pick(' and up','+', '-' . int(rand(130)));
+
+  # join all and return
+  return join(' ', $intro, $features, pick($requires, $weight, $size, $age));
 }
 
 # Item price
@@ -555,7 +660,7 @@ sub layout_2x3
 
   ###
   # Render a picture of the object.
-  my $scene = generate_header() . generate_object() . generate_scene_lightbox();
+  my $scene = generate_scene();
   render($scene, $page, $x, $y - $h, $w, $h);
 
   # Add some text to the page
@@ -596,7 +701,7 @@ sub layout_2x2
 
   ###
   # Render a picture of the object.
-  my $scene = generate_header() . generate_object() . generate_scene_lightbox();
+  my $scene = generate_scene();
   render($scene, $page, $x, $y - $h, $w, $h);
 
   # Add some text to the page
@@ -638,7 +743,7 @@ sub layout_2x1
 
   ###
   # Render a picture of the object.
-  my $scene = generate_header() . generate_object() . generate_scene_lightbox();
+  my $scene = generate_scene();
   render($scene, $page, $x, $y - $h, $w, $h);
 
   # Add some text to the page
@@ -678,7 +783,7 @@ sub layout_1x3
 
   ###
   # Render a picture of the object.
-  my $scene = generate_header() . generate_object() . generate_scene_lightbox();
+  my $scene = generate_scene();
   render($scene, $page, $x, $y - $h, $w, $h);
 
   # Add some text to the page
@@ -725,7 +830,7 @@ sub layout_1x2
 
   ###
   # Render a picture of the object.
-  my $scene = generate_header() . generate_object() . generate_scene_lightbox();
+  my $scene = generate_scene();
   render($scene, $page, $x, $y - $h, $w, $h);
 
   # Add some text to the page
@@ -773,25 +878,25 @@ sub layout_1x1
 
   ###
   # Render a picture of the object.
-  my $scene = generate_header() . generate_object() . generate_scene_lightbox();
+  my $scene = generate_scene();
   render($scene, $page, $x, $y - $h, $w, $h);
 
   # Add some text to the page
-  $y -= 16;
+  $y -= 14;
   # Create a title
-  my $title = generate_name();
-  $y = text($title, $page, $x, $y, { font => $font{helvetica_bold}, size => 16 });
+  my $title = uc(generate_name());
+  $y = text($title, $page, $x, $y, { font => $font{helvetica_bold}, size => 14, w => $w });
 
   # Create some ad copy
   my $description = generate_description();
-  $y = text($description, $page, $x, $y, { size => 14, w => $w });
+  $y = text($description, $page, $x, $y, { size => 12, w => $w });
 
   # Create an ID number
   my $id = join('', map { uc(substr($_, 0, 1)) } split(/ /, $title)) . int(rand(99999));
   # Create a price
   my $price = generate_price();
   # Place text on page.
-  $y = text("$id | $price", $page, $x, $y, { font => $font{helvetica_bold}, size => 14 });
+  $y = text("$id | $price", $page, $x, $y, { font => $font{helvetica_bold}, size => 12 });
 }
 
 ##############################################################################
@@ -806,6 +911,7 @@ sub layout_1x1
 #  Load data files
 $data{adjectives} = load('data/adjectives.txt');
 $data{nouns} = load('data/nouns.txt');
+$data{verbs} = load('data/verbs.txt');
 $data{technologies} = load('data/technologies.txt');
 
 # Create a blank PDF file
@@ -857,7 +963,7 @@ $font{helvetica_bold} = $pdf->corefont('Helvetica-Bold');
 
 # CONTENT PAGES
 # Loop N pages
-for (my $i = 0; $i < 5; $i ++)
+for (my $i = 0; $i < PAGES; $i ++)
 {
   say "page $i...";
 
